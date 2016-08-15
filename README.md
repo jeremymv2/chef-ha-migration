@@ -4,7 +4,7 @@ Migrating data from non-HA Chef Server to Chef HA Backend.
 This assumes a newly installed Chef HA backend cluster is available and not yet populated with data.
 
 
-#### Create an Organization on one of the Front End nodes of the new HA cluster
+#### Create an Organization and Backup admin user on one of the Front End nodes of the new HA cluster
 
 ```
 sudo chef-server-ctl user-create backup Bob Backup backup@example.com securepassword --filename backupkey.pem
