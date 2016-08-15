@@ -61,5 +61,5 @@ The command above will download all data from the src Chef Server and store them
 
 Import the data into DST HA Cluster
 ```
-knife ec -c chef_backups/conf/knife_src_server.rb restore chef_backups --webui-key chef_backups/conf/webui_priv_dst.pem
+knife ec -c chef_backups/conf/knife_dst_server.rb restore chef_backups --webui-key chef_backups/conf/webui_priv_dst.pem
 ```
