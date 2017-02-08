@@ -14,9 +14,12 @@ sudo chef-server-ctl org-create brewinc "Brew, Inc." --association_user admin --
 
 #### Set up your work environment
 
-Install latest knife-ec-backup gem and create workspace for backups
+Install latest knife-ec-backup gem from the master branch of the repo and create workspace for backups
 ```
-chef gem install knife-ec-backup
+git clone https://github.com/chef/knife-ec-backup.git
+cd knife-ec-backup/
+chef gem build knife-ec-backup.gemspec
+chef gem install knife-ec-backup*gem --no-ri --no-rdoc -V
 mkdir -p chef_backups/conf
 ```
 
