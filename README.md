@@ -7,9 +7,9 @@ This assumes a newly installed Chef HA backend cluster is available and not yet 
 #### Create an Organization and Backup admin user on one of the Front End nodes of the new HA cluster
 
 ```
-sudo chef-server-ctl user-create backup Bob Backup backup@example.com securepassword --filename backupkey.pem
+sudo chef-server-ctl user-create brewadmin Bob Backup backup@example.com securepassword --filename backupkey.pem
 
-sudo chef-server-ctl org-create brewinc "Brew, Inc." --association_user admin --filename brewinc-validator.pem
+sudo chef-server-ctl org-create brewinc "Brew, Inc." --association_user brewadmin --filename brewinc-validator.pem
 ```
 
 #### Set up your work environment
