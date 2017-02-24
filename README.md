@@ -47,6 +47,9 @@ knife ssl -c knife_dst_server.rb fetch
 Copy the `/etc/opscode/webui_priv.pem` file from both the SOURCE and DESTINATION Chef Servers locally into `chef_backups/conf` giving them unique names.
 
 ### Infrastructure
+Since `knife-ec-backup` uses the Chef Server API entirely it is more agnostic to the Chef Server version and topology deployed.  For that reason, it is going to be more flexible than `pg_dumpall` or `chef-server-ctl backup|restore` - both of which should ONLY be used to backup/restore LIKE versions and LIKE topologies of Chef Server.  For that reason, `knife-ec-backup` is a perfect candidate to assist with migrating from a standalone or tiered toplogy to an HA backended cluster.
+
+**Note:** As a pre-requisite to a migration, you should upgrade both the source and destination Chef servers to the most recent version available, and the version shold match across all Chef servers.
 
 ### Backup from SOURCE
 
@@ -59,7 +62,7 @@ cd ../..
 knife ec -c chef_backups/conf/knife_src_server.rb backup chef_backups --webui-key chef_backups/conf/webui_priv_src.pem
 ```
 
-The command above will download all data from the source Chef Server and store objects as individual json files beneath `chef_backups`.  It is safe to re-run the backup multiple times over the existing `chef_backups` directory.  On subsequent runs, `knife-ec-backup` will do a differential backup of the `/cookbooks` objects, which potentially consume the most amount of time to transfer, in addition to the `nodes` objects.
+The command above will download all data from the source Chef Server and store objects as individual json files beneath `chef_backups`.  It is safe to re-run the backup multiple times over the existing `chef_backups` directory.  On subsequent runs, `knife-ec-backup` will do a differential backup of the `/cookbooks` objects.
 
 ### Restore to new DESTINATION
 
@@ -89,10 +92,34 @@ restore | 50 | Yes | 15:00
 
 ### Discoveries
 1. Bumping the concurrency setting significantly improves backup times while having a detrimental effect on restores.
-2. Cookbook backup and restores are incremental and therefore very chatty and expensive calls to make.  In addition to node objects, they consume the lion's share of the overall time.
-3. By far and away, Node Objects are the least optimized item on restores.  
+2. Cookbook backup and restores are incremental and only transferred if the src/dst is different.
+3. As of version 2.0.7 of `knife-ec-backup`, Node Objects are the least optimized item on restores, significantly impacting the overall time.
 
 ### Optimization
+The reason for #3 above is primarily because the Chef Server API does not have a low cost method for interrogating if a node exists or not. The API exposes `GET /organizations/NAME/nodes/NAME` which will return the entire node object to the requestor.  There is also `GET /organizations/NAME/nodes` which returns a hash of all the node names. `knife-ec-backup` uses the latter to interrogate if the node exists or not because the API endpoint for updating a node object is a different endpoint than the one for creating a node new node object and it needs to know which operation to use on the restore: either create or update.
+
+To create a new node, you use `POST /organizations/NAME/nodes` posting the node object.  To update a node, you use `PUT /organizations/NAME/nodes/NAME`.  Therefore, on EACH node object restore, `knife-ec-backup` issues a `GET /organizations/NAME/nodes` and loops through the hash to determine if the node name exists or not.  This is not terrible unless the node count increases above say 1,000 then the hash being returned on every node request combined with the operation of looping through to determine if the node key exists becomes prohibitively expensive.
+
+All the above to say: the greater the node count the more inefficient the restore operation becomes and it actually slows down as it makes its way through restoring the nodes to the target.
+
+To workaround this short term issue, until `knife-ec-backup` can be corrected or the Chef Server API improved, we've created a ruby script that uses a different approach for node restores.
+
+The script below assumes no nodes exist and therefore does not request the node list, but just does a `POST /organizations/NAME/nodes` to create the node, if it receives a `HTTP 409 Conflict` response, the node exists so it follows up with a `PUT /organizations/NAME/nodes/NAME` to update the existing node.
+
+As shown in the table above, this improved the overall restore operation of our data set from >1.5 hours to 15 minutes.
+
+In order to use this optimization on a restore, rename the `nodes` directory to something that `knife-ec-backup` will ignore, like `mynodes`.  Run the `knife-ec-backup` restore operation as described above then follow up by running the script below:
+
+```
+~/Devel/ChefProject$ ./restore_nodes.rb -h
+Usage: ./restore_nodes.rb [options]
+    -c, --config PATH                path to knife/client config file
+    -n, --nodes PATH                 path to nodes directory
+    -h, --help                       Show this message
+~/Devel/ChefProject$ ./restore_nodes.rb -c ~/.chef/knife.rb -n path/to/mynodes
+```
+
+**Note**: You will have to supply a valid `knife.rb` file with an admin's credentials (potentially re-use the pivotal key from the steps above), for each org in the backup.
 
 ```ruby
 #!/usr/bin/env ruby
