@@ -55,7 +55,7 @@ Since `knife-ec-backup` uses the Chef Server API entirely it is more agnostic to
 
 By default `knife-ec-backup` will use a concurrency of 10.  We've found in testing that a concurrency of 50 seems to be a sweet spot and yields significant improvement.  Any higher than 50 and you will likely reach a point of diminishing returns.  Also, it is important to keep in mind that concurrency can cause a spike in the load on your Chef Server.  Thus, keep a close watch on your Chef Server stats while running a backup and terminate the backup if returning excessive HTTP 500s to chef client agents.
 
-**IMPORTANT NOTE:** To add additional concurrency threads, append `--concurrency 50` to the following command:
+**IMPORTANT:** To add additional concurrency threads, append `--concurrency 50` to the following command:
 
 ```bash
 cd ../..
@@ -63,6 +63,8 @@ knife ec -c chef_backups/conf/knife_src_server.rb backup chef_backups --webui-ke
 ```
 
 The command above will download all data from the source Chef Server and store objects as individual json files beneath `chef_backups`.  It is safe to re-run the backup multiple times over the existing `chef_backups` directory.  On subsequent runs, `knife-ec-backup` will do a differential backup of the `/cookbooks` objects.
+
+**Note:** Because the `backup` operation can be run multiple times and only NEW cookbooks added to the source will be transferred down, one good strategy may be to run repeated backups ahead of the migration day if the initial backup takes a prohibitively long time. Running several small backups ahead of time may be better than running one BIG one on migration day.
 
 ### Restore to new DESTINATION
 
