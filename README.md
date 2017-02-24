@@ -104,7 +104,7 @@ All the above to say: the greater the node count the more inefficient the restor
 
 To workaround this short term issue, until `knife-ec-backup` can be corrected or the Chef Server API improved, we've created a ruby script that uses a different approach for node restores.
 
-The script below assumes no nodes exist and therefore does not request the node list, but just does a `POST /organizations/NAME/nodes` to create the node, if it receives a `HTTP 409 Conflict` response, the node exists so it follows up with a `PUT /organizations/NAME/nodes/NAME` to update the existing node.
+The script below assumes no nodes exist and therefore does not request the node list, but just does a `POST /organizations/NAME/nodes` to create the node, if it receives a `HTTP 409 Conflict` response, the node exists so it follows up with a `PUT /organizations/NAME/nodes/NAME` to update the existing node. It uses Threading, allowing you to set the number of worker threads but defaults to 50.
 
 As shown in the table above, this improved the overall restore operation of our data set from >1.5 hours to 15 minutes.
 
