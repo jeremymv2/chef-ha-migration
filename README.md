@@ -10,17 +10,17 @@ Provision a dedicated backup/migration system with plenty of disk space.  This a
 Install the ChefDK (https://downloads.chef.io/chefdk)
 
 Install latest knife-ec-backup gem from rubygems.org
-```
+```bash
 chef gem install knife-ec-backup
 ```
 
 Create a local backups working directory
-```
+```bash
 mkdir -p chef_backups/conf
 ```
 
 Create a local `knife.rb` for the SOURCE and DESTINATION Chef Servers from which we'll export then import the data
-```
+```bash
 cd chef_backups/conf
 cat <<EOF> knife_src_server.rb
 current_dir = File.dirname(__FILE__)
@@ -39,7 +39,7 @@ EOF
 ```
 
 Fetch the ssl certs
-```
+```bash
 knife ssl -c knife_src_server.rb fetch
 knife ssl -c knife_dst_server.rb fetch
 ```
@@ -57,7 +57,7 @@ By default `knife-ec-backup` will use a concurrency of 10.  We've found in testi
 
 **IMPORTANT NOTE:** To add additional concurrency threads, append `--concurrency 50` to the following command:
 
-```
+```bash
 cd ../..
 knife ec -c chef_backups/conf/knife_src_server.rb backup chef_backups --webui-key chef_backups/conf/webui_priv_src.pem
 ```
@@ -68,7 +68,7 @@ The command above will download all data from the source Chef Server and store o
 
 Again, for best results, the recommended strategy is to utilize a new destination cluster without any pre-existing data.
 
-```
+```bash
 knife ec -c chef_backups/conf/knife_dst_server.rb restore chef_backups --webui-key chef_backups/conf/webui_priv_dst.pem
 ```
 
@@ -110,7 +110,7 @@ As shown in the table above, this improved the overall restore operation of our 
 
 In order to use this optimization on a restore, rename the `nodes` directory to something that `knife-ec-backup` will ignore, like `mynodes`.  Run the `knife-ec-backup` restore operation as described above then follow up by running the script below:
 
-```
+```bash
 ~/Devel/ChefProject$ ./restore_nodes.rb -h
 Usage: ./restore_nodes.rb [options]
     -c, --config PATH                path to knife/client config file
@@ -166,6 +166,22 @@ workers = (0...50).map do
   end
 end
 workers.map(&:join)
+```
+
+For testing purposes we mocked 10,000 nodes by utilzing a "seed" node file, then simply copying that file to a new file name and replacing the node name within:
+```bash
+#!/bin/bash
+
+# Load original node file
+
+cd nodes/
+
+for node in {1..10000}
+do
+  cp seed-node.json node-$node.json
+  sed -i.bak "s/vagrant-b4eaed79/node-$node/" node-$node.json
+  rm -f *.bak
+done
 ```
 
 ### Potential Improvements to `knife-ec-backup` v2.0.7
