@@ -82,13 +82,13 @@ During our testing we set up an environment with the following, utilizing an imp
 - Backended HA Cluster (destination) consisting of 3 backends and 2 frontends
 - The ec-backup of this configuration resulted in 1GB of total data stored on the workstation.
 
-Type | Concurrency | Optimization Used? | Duration
+Type | Concurrency | Optimization Used? | Duration (mins)
 --- | --- | --- | ---
-backup | 10 (default) | No | 14:00
-backup | 50 | No | 5:00
-restore | 10 (default) | No | ~120:00
-restore | 50 | No | > 120:00
-restore | 50 | Yes | 15:00
+backup | 10 (default) | No | 14
+backup | 50 | No | 5
+restore | 10 (default) | No | ~120
+restore | 50 | No | > 120
+restore | 50 | Yes | 15
 
 ### Discoveries
 1. Bumping the concurrency setting significantly improves backup times while having a detrimental effect on restores.
@@ -172,12 +172,11 @@ For testing purposes we mocked 10,000 nodes by utilzing a "seed" node file, then
 ```bash
 #!/bin/bash
 
-# Load original node file
-
 cd nodes/
 
 for node in {1..10000}
 do
+  # copy original node to new node file
   cp seed-node.json node-$node.json
   sed -i.bak "s/vagrant-b4eaed79/node-$node/" node-$node.json
   rm -f *.bak
