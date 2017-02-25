@@ -80,7 +80,7 @@ If `knife-ec-backup` receives a 500 response while restoring, it will retry the 
 
 ### Testing Results
 During our testing we set up an environment with the following, utilizing an implementation of the resource cookbook [chef_stack](https://github.com/ncerny/chef_stack):
-- Standalone Chef Server (source) with 1,600 cookbooks and 10,000 nodes
+- Standalone Chef Server (source) with 1,600 cookbook versions and 10,000 nodes
 - Backended HA Cluster (destination) consisting of 3 backends and 2 frontends
 - The ec-backup of this configuration resulted in 1GB of total data stored on the workstation.
 
