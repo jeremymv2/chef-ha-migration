@@ -174,6 +174,8 @@ end
 workers.map(&:join)
 ```
 
+The above code can be found in this [gist](https://gist.github.com/jeremymv2/85775008c8b4d6d49e2c4f8ce2da4825)
+
 ### Potential Improvements to `knife-ec-backup` v2.0.7
 - Modifying the behavior of `knife-ec-backup` to incorporate the strategy in the above workaround: Just sending a POST and if a 409 is received, send a PUT.
 - Adding the capability of uploading a tarball for both cookbooks and nodes and just letting the Chef Server handle it
