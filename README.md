@@ -153,10 +153,14 @@ def sendnode(node)
   printf("Creating %s\n", node['name'])
   REST.post_rest('/nodes', node)
 rescue Net::HTTPServerException => e
-  REST.put_rest("/nodes/#{node['name']}", node) if e.message == '409 "Conflict"'
+  case e.message
+  when /409/
+    REST.put_rest("/nodes/#{node['name']}", node)
+  end
+  printf("  #{node['name']}: #{e.message}\n")
 end
 
-workers = (0...50).map do
+workers = (0...5).map do
   Thread.new do
     begin
       while (node_file = queue.pop(true))
@@ -170,24 +174,9 @@ end
 workers.map(&:join)
 ```
 
-For testing purposes we mocked 10,000 nodes by utilzing a "seed" node file, then simply copying that file to a new file name and replacing the node name within:
-```bash
-#!/bin/bash
-
-cd nodes/
-
-for node in {1..10000}
-do
-  # copy original node to new node file
-  cp seed-node.json node-$node.json
-  sed -i.bak "s/vagrant-b4eaed79/node-$node/" node-$node.json
-  rm -f *.bak
-done
-```
-
 ### Potential Improvements to `knife-ec-backup` v2.0.7
 - Modifying the behavior of `knife-ec-backup` to incorporate the strategy in the above workaround: Just sending a POST and if a 409 is received, send a PUT.
 - Adding the capability of uploading a tarball for both cookbooks and nodes and just letting the Chef Server handle it
-- Modifying the Chef Server API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination - the gratuitous POST is likely the best option.
-- A variation of the above would be to modify the GET request on nodes to just request HEAD so that the full node object isn't returned in the request.
+- Modifying the Chef Server API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination, but just seems like a good idea in general.
+- A variation of the above is the ability to just request HEAD on `/nodes/name` so that the full node object isn't returned in the request and look for a 202 or 404 response.
 - Improve the documentation in the `knife-ec-backup` [README.md](https://github.com/chef/knife-ec-backup/blob/master/README.md)
