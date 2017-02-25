@@ -47,7 +47,7 @@ knife ssl -c knife_dst_server.rb fetch
 Copy the `/etc/opscode/webui_priv.pem` file from both the SOURCE and DESTINATION Chef Servers locally into `chef_backups/conf` giving them unique names.
 
 ### Infrastructure
-Since `knife-ec-backup` uses the Chef Server API entirely it is more agnostic to the Chef Server version and topology deployed.  For that reason, it is going to be more flexible than `pg_dumpall` or `chef-server-ctl backup|restore` - both of which should ONLY be used to backup/restore LIKE versions and LIKE topologies of Chef Server.  For that reason, `knife-ec-backup` is a perfect candidate to assist with migrating from a standalone or tiered toplogy to an HA backended cluster.
+Since `knife-ec-backup` uses the Chef Server API entirely it is more agnostic with regards to the Chef Server version and topology deployed.  For that reason, it is going to be more flexible than `pg_dumpall` or `chef-server-ctl backup|restore` - both of which should ONLY be used to backup/restore LIKE versions and LIKE topologies of Chef Server.  For that reason, `knife-ec-backup` is a perfect candidate to assist with migrating from a standalone or tiered toplogy to an HA backended cluster.
 
 **Note:** As a pre-requisite to a migration, you should upgrade both the source and destination Chef servers to the most recent version available, and the version shold match across all Chef servers.
 
