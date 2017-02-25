@@ -181,7 +181,7 @@ The above code can be found in this [gist](https://gist.github.com/jeremymv2/857
 
 ### Potential Improvements to `knife-ec-backup` and/or `chef-client`, `chef-server`.
 - Modifying the behavior of `knife-ec-backup` to incorporate the strategy in the above workaround: Just sending a POST and if a 409 is received, send a PUT.
-- Adding the capability of uploading a tarball for both cookbooks and nodes and just letting the Chef Server handle it
-- Modifying the Chef Server API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination, but just seems like a good idea in general.
-- A variation of the above is the ability to just request HEAD on `/nodes/name` so that the full node object isn't returned in the request and look for a 200 or 404 response.
+- Adding the capability of uploading a tarball for both cookbooks and nodes and just letting `chef-server` handle it
+- Modifying the `chef-server` API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination, but just seems like a good idea in general.
+- A variation of the above is the ability to modify `chef-client`'s `Chef::ServerAPI` to be able to request HEAD on `/nodes/name` so that the full node object isn't returned in the request and look for a 200 or 404 response.
 - Additional information in the `knife-ec-backup` [README.md](https://github.com/chef/knife-ec-backup/blob/master/README.md)
