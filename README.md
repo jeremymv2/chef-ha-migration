@@ -64,7 +64,7 @@ knife ec -c chef_backups/conf/knife_src_server.rb backup chef_backups --webui-ke
 
 The command above will download all data from the source Chef Server and store objects as individual json files beneath `chef_backups`.  It is safe to re-run the backup multiple times over the existing `chef_backups` directory.  On subsequent runs, `knife-ec-backup` will do a differential backup of the `/cookbooks` objects.
 
-**Note:** Because the `backup` operation can be run multiple times and only NEW cookbooks added to the source will be transferred down, one good strategy may be to run repeated backups ahead of the migration day if the initial backup takes a prohibitively long time. Running several small backups ahead of time may be better than running one BIG one.
+**Note:** Because the `backup` operation can be run multiple times and only NEW cookbooks added to the source will be transferred down, one good strategy may be to run repeated backups ahead of the migration day if the initial backup takes a prohibitively long time. Running several small backups ahead of time may be better than running one BIG one. Another supporting strategy might be performing backups during low-peak times, or adding frontend capacity during both backups (db connections) and restores (frontend CPU bound).
 
 ### Restore to new DESTINATION
 
