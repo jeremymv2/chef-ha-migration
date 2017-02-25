@@ -123,6 +123,9 @@ Usage: ./restore_nodes.rb [options]
 
 **Note**: You will have to supply a valid `knife.rb` file with an admin's credentials (potentially re-use the pivotal key from the steps above), for each org in the backup.
 
+Since this script needs to be run per-org, if you have multiple orgs in the backup, then consider serializing the restore with: `knife ec restore --only-org ORG ..`
+for each org, followed by running `restore_nodes` on that org.  The entire process would benefit from being scripted.
+
 ```ruby
 #!/usr/bin/env ruby
 
@@ -181,4 +184,4 @@ The above code can be found in this [gist](https://gist.github.com/jeremymv2/857
 - Adding the capability of uploading a tarball for both cookbooks and nodes and just letting the Chef Server handle it
 - Modifying the Chef Server API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination, but just seems like a good idea in general.
 - A variation of the above is the ability to just request HEAD on `/nodes/name` so that the full node object isn't returned in the request and look for a 200 or 404 response.
-- Improve the documentation in the `knife-ec-backup` [README.md](https://github.com/chef/knife-ec-backup/blob/master/README.md)
+- Additional information in the `knife-ec-backup` [README.md](https://github.com/chef/knife-ec-backup/blob/master/README.md)
