@@ -179,7 +179,7 @@ workers.map(&:join)
 
 The above code can be found in this [gist](https://gist.github.com/jeremymv2/85775008c8b4d6d49e2c4f8ce2da4825)
 
-### Potential Improvements to `knife-ec-backup` v2.0.7
+### Potential Improvements to `knife-ec-backup` and/or `chef-client`, `chef-server`.
 - Modifying the behavior of `knife-ec-backup` to incorporate the strategy in the above workaround: Just sending a POST and if a 409 is received, send a PUT.
 - Adding the capability of uploading a tarball for both cookbooks and nodes and just letting the Chef Server handle it
 - Modifying the Chef Server API so that there is a way to query if a node exists without having to transfer the entire node object.  This is of lesser value to the use-case scenario of restoring to a blank destination, but just seems like a good idea in general.
