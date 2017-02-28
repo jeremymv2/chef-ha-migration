@@ -6,6 +6,7 @@
 Because Chef HA does not have an in-place migration tool, the expectation is that you will build and validate a new Chef HA Cluster and then migrate your data to it.
 
 The steps to building a new Chef HA Cluster are as follows:
+
 1. Build a new Chef HA Cluster (bonus points for using [automation](https://github.com/ncerny/chef_stack) to reproducibly build your cluster)
 2. Validate your new Chef HA Cluster  (we cannot stress enough the importance of this)
     * Test each new frontend using `chef-server-ctl test`
@@ -31,6 +32,7 @@ The steps to building a new Chef HA Cluster are as follows:
     * An advanced strategy is to migrate one org or batches of orgs at a time.  In this case you'll need to:
         * Use the chef-client cookbook or similar strategy to update the client.rb file on every node to point at the new cluster
         * Filter already-migrated orgs from the backup/restore once migration is complete
+
 
 ### Some Setup
 
