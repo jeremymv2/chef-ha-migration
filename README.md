@@ -1,38 +1,38 @@
 # Data Migration Strategy for HA Chef Backend Cluster
 
 ## Overview
-`knife-ec-backup` is Chef's tool for migrating data between Chef server clusters of varying topologies (Standalone, Tier, old-HA, new-HA) and versions (with some limitations).   Unlike Chef's filesystem-based backup/restore tools (`pg_dumpall` or `chef-server-ctl backup|restore`), it is going to be more flexible. Filesystem-based backup/restore tools can ONLY be used to backup/restore LIKE versions and LIKE topologies of Chef Server. `knife-ec-backup` on the other hand, creates a highly portable object-based backup of the entire Chef server including all Orgs, Users, Cookbooks, Databags, etc.
+`knife-ec-backup` is Chef's tool for migrating data between Chef server clusters of varying topologies (Standalone, Tier, old-HA, new-HA) and versions (with some limitations).   Unlike Chef's filesystem-based backup/restore tools (`pg_dumpall` or `chef-server-ctl backup|restore`), it is going to be more flexible. Filesystem-based backup/restore tools can ONLY be used to backup/restore LIKE versions and LIKE topologies of Chef Server. `knife-ec-backup` on the other hand, creates a highly portable object-based backup of the entire Chef server including all Orgs, Users, Cookbooks, Databags, etc.
 
 Because Chef HA does not have an in-place migration tool, the expectation is that you will build and validate a new Chef HA Cluster and then migrate your data to it.
 
 The steps to building a new Chef HA Cluster are as follows:
 1. Build a new Chef HA Cluster (bonus points for using [automation](https://github.com/ncerny/chef_stack) to reproducibly build your cluster)
-2. Validate your new Chef HA Cluster  (we cannot stress enough the importance of this)
+2. Validate your new Chef HA Cluster  (we cannot stress enough the importance of this)
     * Test each new frontend using `chef-server-ctl test`
     * Test both hard and soft failovers of the backend systems
     * Load test your new cluster using [chef-load](https://github.com/jeremiahsnapp/chef-load)
-3. Perform a full backup of your current production Chef Server cluster.  Note:
+3. Perform a full backup of your current production Chef Server cluster.  Note:
     * `knife-ec-backup` can generate considerable load on your cluster, particularly when increasing parallelism.
-    * It is recommend that you upgrade to the latest versions of Chef Server if at all possible.   Using the latest version of `knife-ec-backup` is a requirement.
-    * If you begin to experience 500 errors on your existing Chef Server during a full backup, attempt these during off-peak hours if possible. 
-    * Performance tuning of your Chef server may be required.  For more information see:
+    * It is recommend that you upgrade to the latest versions of Chef Server if at all possible.   Using the latest version of `knife-ec-backup` is a requirement.
+    * If you begin to experience 500 errors on your existing Chef Server during a full backup, attempt these during off-peak hours if possible.
+    * Performance tuning of your Chef server may be required.  For more information see:
         * [Monitoring and Tuning your Chef Server](https://www.slideshare.net/AndrewDuFour1/monitoring-and-tuning-your-chef-server-chef-conf-talk)
         * [Tuning the Chef Server for Scale](http://irvingpop.github.io/blog/2015/04/20/tuning-the-chef-server-for-scale/)
         * [Understanding the Chef Server](https://www.youtube.com/watch?v=22GtVMHJDsI)
     * An advanced strategy may be to temporarily add a dedicated Frontend to existing Tier/HA topologies in order to reduce loading on the remaining frontends
 4. Perform a full restore to the new cluster
     * The performance monitoring and tuning advice from the previous step will help achieve higher levels of parallelism
-    * There may be errors encountered during restore - for example expired user-org invitations that point to deleted users.  It is recommended that you fix as many of these as possible on the source server.   If that's not possible, it's possible to fix the errors directly in the JSON filess as an intermediate "data cleanup" stage before restoring.
+    * There may be errors encountered during restore - for example expired user-org invitations that point to deleted users.  It is recommended that you fix as many of these as possible on the source server.   If that's not possible, it's possible to fix the errors directly in the JSON filess as an intermediate "data cleanup" stage before restoring.
 5. Validate the target cluster
     * Retest the cluster both `chef-server-ctl test` as well as re-pointing a number of non-critical nodes at the new cluster
 6. Perform nightly incremental backups/restores
-    * `knife-ec-backup` can operate in a pseudo-incremental mode as long as you keep the backup directory intact.  Continue to run backups/restores and you'll notice they complete much faster than the original
-    * Note the time it takes for an incremental backup/restore to complete - this should provide you with the clearest guidance for how long of a downtime/maintenance window to schedule 
-    * An advanced strategy is to migrate one org or batches of orgs at a time.  In this case you'll need to:
+    * `knife-ec-backup` can operate in a pseudo-incremental mode as long as you keep the backup directory intact.  Continue to run backups/restores and you'll notice they complete much faster than the original
+    * Note the time it takes for an incremental backup/restore to complete - this should provide you with the clearest guidance for how long of a downtime/maintenance window to schedule
+    * An advanced strategy is to migrate one org or batches of orgs at a time.  In this case you'll need to:
         * Use the chef-client cookbook or similar strategy to update the client.rb file on every node to point at the new cluster
         * Filter already-migrated orgs from the backup/restore once migration is complete
 
-### `knife-ec-backup` Setup
+### Some Setup
 
 Install the [ChefDK](https://downloads.chef.io/chefdk)
 
@@ -73,7 +73,7 @@ knife ssl -c knife_dst_server.rb fetch
 
 Copy the `/etc/opscode/webui_priv.pem` file from both the SOURCE and DESTINATION Chef Servers locally into `chef_backups/conf` giving them unique names.
 
-### Backup from SOURCE
+### Backup the Source
 
 By default `knife-ec-backup` will use a concurrency of 10.  We've found in testing that a concurrency of 50 seems to be a sweet spot and yields significant improvement.  Any higher than 50 and you will likely reach a point of diminishing returns.  Also, it is important to keep in mind that concurrency can cause a spike in the load on your Chef Server.  Thus, keep a close watch on your Chef Server stats while running a backup and terminate the backup if returning excessive HTTP 500s to chef client agents.
 
@@ -88,7 +88,7 @@ The command above will download all data from the source Chef Server and store o
 
 **Note:** Because the `backup` operation can be run multiple times and only NEW cookbooks added to the source will be transferred down, one good strategy may be to run repeated backups ahead of the migration day if the initial backup takes a prohibitively long time. Running several small backups ahead of time may be better than running one BIG one. Another supporting strategy might be performing backups during low-peak times, or adding frontend capacity during both backups (db connections) and restores (frontend CPU bound).
 
-### Restore to new DESTINATION
+### Restore to the new Chef HA Cluster
 
 Again, for best results, the recommended strategy is to utilize a new destination cluster without any pre-existing data.
 
