@@ -32,7 +32,7 @@ The steps to building a new Chef HA Cluster are as follows:
         * Use the chef-client cookbook or similar strategy to update the client.rb file on every node to point at the new cluster
         * Filter already-migrated orgs from the backup/restore once migration is complete
 
-### Backup / Restore Process
+### `knife-ec-backup` Setup
 
 Install the [ChefDK](https://downloads.chef.io/chefdk)
 
@@ -72,11 +72,6 @@ knife ssl -c knife_dst_server.rb fetch
 ```
 
 Copy the `/etc/opscode/webui_priv.pem` file from both the SOURCE and DESTINATION Chef Servers locally into `chef_backups/conf` giving them unique names.
-
-### Infrastructure
-Since `knife-ec-backup` uses the Chef Server API entirely it is more agnostic with regards to the Chef Server version and topology deployed.    For that reason, `knife-ec-backup` is a perfect candidate to assist with migrating from a standalone or tiered toplogy to an HA backended cluster.
-
-**Note:** As a pre-requisite to a migration, you should upgrade both the source and destination Chef servers to the most recent version available, and the version shold match across all Chef servers.
 
 ### Backup from SOURCE
 
