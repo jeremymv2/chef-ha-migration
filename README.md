@@ -134,6 +134,10 @@ During our testing we set up an environment with the following, utilizing an imp
 2. Cookbook backup and restores are incremental and only transferred if the src/dst is different.
 3. Backup/Restore has not been optimized yet for large user sets.  If you have a large user set (eg. > 1,000) this can add ~15 mins.
 
+### Errors?
+- if you encounter any un-recoverable errors during a backup/restore try adding the `-VV` flag to the knife command for maximum information.
+- https://github.com/chef/knife-ec-backup/pull/90 work being done to better handle errors
+
 ### Optimizations made recently (March 2017):
 - https://github.com/chef/knife-ec-backup/pull/92
 - https://github.com/chef/knife-ec-backup/pull/88
