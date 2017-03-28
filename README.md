@@ -142,3 +142,9 @@ During our testing we set up an environment with the following, utilizing an imp
 
 An example knife-ec-backup shell script can be found in this [gist](https://gist.github.com/jeremymv2/9c14086e13cac572235fe4bab5881ed3)
 - Additional information in the `knife-ec-backup` [README.md](https://github.com/chef/knife-ec-backup/blob/master/README.md)
+
+### Thanks (all were contributors on this work)
+- Irving Popovetsky
+- Nolan Davidson
+- Josh Hudson
+- David Echols
